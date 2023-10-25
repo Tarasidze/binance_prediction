@@ -5,7 +5,7 @@ The script provides a trading strategy that takes quote history as input, calcul
 ## :memo: Table of Contents
 
 - [Installation](#rocket-getting-started)
-- [Script usage](#Script-usage)
+- [Script usage](#computer-script-usage)
 
 ## :rocket: Installation 
 
@@ -41,3 +41,4 @@ The script provides a trading strategy that takes quote history as input, calcul
 **Start**
     ```
     ```
+    
