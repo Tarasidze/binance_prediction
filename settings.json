@@ -1,0 +1,13 @@
+{
+    "script_version": "1.0.0",
+    "script_name": "bibance_prediction",
+    "rsi_ob_level": 70,
+    "rsi_os_level": 30,
+    "rsi_length": 14,
+    "interval_minutes": 1,
+    "period_years": 4,
+    "cci_period": 30,
+    "data_file": "data.csv",
+    "symbol": "ETHBTC",
+    "outputs_catalogue": "outputs"
+}
