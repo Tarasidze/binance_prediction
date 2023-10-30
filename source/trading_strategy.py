@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 
 class Strategy:
@@ -16,9 +17,11 @@ class Strategy:
 
         """
         Implementing trading stratagy
-
+        Args:   df: pandas data-frame
+                rsi_up_band: pandas series
+                rsi_down_band: pandas series
         Returns:
-            _type_: dictionary with all necessary points
+            dictionary: dictionary with all necessary points
         """
 
         if (
@@ -31,8 +34,8 @@ class Strategy:
                 "action": True,
                 "side":  "SELL",
                 "entry_price": entry_price,
-                "tp": entry_price * 0.989,
-                "sl": entry_price * 1.005,
+                "tp": np.multiply(entry_price, 0.989),
+                "sl": np.multiply(entry_price, 1.005),
             }
 
         elif (df["close"].iloc[-1] < rsi_down_band.iloc[-1] and
@@ -43,8 +46,8 @@ class Strategy:
                 "action": True,
                 "side":  "BUY",
                 "entry_price": entry_price,
-                "tp": entry_price * 1.01,
-                "sl": entry_price * 0.96,
+                "tp": np.multiply(entry_price, 1.01),
+                "sl": np.multiply(entry_price, 0.96),
             }
 
         else:
