@@ -2,6 +2,7 @@ import os
 import pandas as pd
 import talib as ta
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 from source.settings import Settings
 
 
@@ -47,10 +48,20 @@ class CCIInicator:
         return ta.CCI(df["high"], df["low"], df["close"], self.period)
 
     def show_plot(self, df: pd.DataFrame) -> None:
-        _, ax = plt.subplots(2, sharex=True)
-        ax[0].plot(df["close"])
-        ax[0].legend(loc="upper left")
-        ax[1].plot(df["cci"])
-        ax[1].legend(loc="upper left")
-        plt.suptitle("__--__sdasd__--__")
+        x_axis_date = df["open_time"]
+        rsi_up = df["rsi_up"]
+        rsi_down = df["rsi_down"]
+
+        plt.plot(x_axis_date, rsi_up, label="rsi_up")
+        plt.legend()
+
+        plt.plot(x_axis_date, rsi_down, label="rsi down")
+        plt.title("RSI Indicator")
+        plt.legend()
+        plt.xticks(rotation=20)
+
+        num_ticks = 7
+        x_ticks = x_axis_date[::len(x_axis_date)//num_ticks]
+        plt.xticks(x_ticks)
+
         plt.show()
