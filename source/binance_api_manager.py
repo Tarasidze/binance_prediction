@@ -23,7 +23,7 @@ class BinanceApiManager:
         settings = Settings()
 
         self.file_name = settings.data_file
-        self.interval_minutes = settings.interval_minutes
+        self.interval = settings.interval
         self.period_years = settings.period_years
         self.symbol = settings.symbol
         self.catalogue = settings.outputs_catalogue
@@ -46,7 +46,7 @@ class BinanceApiManager:
         if symbol is None:
             symbol = self.symbol
         if interval is None:
-            interval = self.interval_minutes
+            interval = self.interval
         if period is None:
             period = self.period_years
 
@@ -56,7 +56,7 @@ class BinanceApiManager:
         client = Client(self.apikey, self.secret_key)
         historical = client.get_historical_klines(
             symbol=symbol,
-            interval=Client.KLINE_INTERVAL_1WEEK,
+            interval=self.interval,
             start_str=start_date_str
             )
 
@@ -75,6 +75,21 @@ class BinanceApiManager:
             9: "taker_buy_base_asset_volume",
             10: "taker_buy_quote_asset_volume"
             })
+
+        df["open_time"] = pd.to_datetime(df["open_time"], unit='ms')
+        df = df[[
+            "open_time",
+            "open",
+            "high",
+            "low",
+            "close",
+            "volume",
+            "close_time"
+        ]]
+
+        df[["open", "high", "low", "close", "volume"]] = df[
+            ["open", "high", "low", "close", "volume"]
+            ].apply(pd.to_numeric, errors="coerce")
 
         return df
 
@@ -97,7 +112,7 @@ class BinanceApiManager:
             file_path = os.path.join(os.getcwd(), self.catalogue, file_name)
             counter += 1
 
-        df.to_csv(file_path)
+        df.to_csv(file_path, index=False)
 
     def get_data_from_file(self, file_name: str = None) -> pd.DataFrame | None:
 
@@ -141,9 +156,10 @@ class BinanceApiManager:
             except (FileExistsError, FileNotFoundError) as exc:
                 print("File not found or invalid path: ", exc)
                 return False
-
-        df["open_time"] = pd.to_datetime(df["open_time"], unit="ms")
+    
         df.set_index("open_time", inplace=True)
+        df.set_index("open_time", inplace=True)
+
         title = f"Chart for {self.symbol}, in last {self.period_years} periods"
 
         mpf.plot(df, type="candle", volume=True, title=title, style="yahoo")
