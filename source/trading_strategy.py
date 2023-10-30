@@ -11,8 +11,6 @@ class Strategy:
     @staticmethod
     def apply_strategy(
         df: pd.DataFrame,
-        rsi_up_band: pd.Series,
-        rsi_down_band: pd.Series
     ) -> dict:
 
         """
@@ -25,11 +23,12 @@ class Strategy:
         """
 
         if (
-            df["close"].iloc[-1] > rsi_up_band.iloc[-1] and
-            df["close"].iloc[-2] < rsi_up_band.iloc[-2] and
+            df["close"].iloc[-1] > df["si_up"].iloc[-1] and
+            df["close"].iloc[-2] < df["si_up"].iloc[-2] and
             df["cci"].iloc[-1] > 120
         ):
             entry_price = df["close"].iloc[-1]
+            
             signal = {
                 "action": True,
                 "side":  "SELL",
@@ -38,10 +37,11 @@ class Strategy:
                 "sl": np.multiply(entry_price, 1.005),
             }
 
-        elif (df["close"].iloc[-1] < rsi_down_band.iloc[-1] and
-              df["close"].iloc[-2] > rsi_down_band.iloc[-2] and
+        elif (df["close"].iloc[-1] < df["rsi_down"].iloc[-1] and
+              df["close"].iloc[-2] > df["rsi_down"].iloc[-2] and
               df["cci"].iloc[-1] < -100):
             entry_price = df["close"].iloc[-1]
+            
             signal = {
                 "action": True,
                 "side":  "BUY",
