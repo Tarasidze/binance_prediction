@@ -24,23 +24,23 @@ class Backtester:
                 current_coins = np.divide(start_wallet, signal.get("entry_price"))
 
                 for j in range(i + 1, len(df)):
-                    if df["close"][j] < signal.get("tp"):
+                    if df["close"][j] <= signal.get("tp"):
                         close_wallet = np.multiply(current_coins, df["close"][j])
                         clear_profit = np.subtract(start_wallet, close_wallet)
-                        close_profit = np.multiply(np.add(clear_profit, start_wallet), self.trading_fees) - self.trade_volume
+                        close_profit = np.subtract(np.multiply(np.add(clear_profit, start_wallet), self.trading_fees), self.trade_volume)
 
                         total_profit += close_profit
                         contracts_positive += 1
                         print("SELL, poss: ", contracts_positive, df["open_time"][i])
                         break
 
-                    if df["close"][j] > signal.get("sl"):
+                    if df["close"][j] >= signal.get("sl"):
                         close_wallet = np.multiply(current_coins, df["close"][j])
                         clear_loss = np.subtract(close_wallet, start_wallet)
-                        close_loss = self.trade_volume - np.multiply(np.subtract(start_wallet, clear_loss), self.trading_fees)
+                        close_loss = np.subtract(self.trade_volume, np.multiply(np.subtract(start_wallet, clear_loss), self.trading_fees))
 
                         total_loss -= close_loss
-                        contracts_negative -= 1
+                        contracts_negative += 1
                         break
 
             elif signal.get("action") and signal.get("side") == "BUY":
@@ -48,23 +48,24 @@ class Backtester:
                 current_coins = np.divide(start_wallet, signal.get("entry_price"))
 
                 for j in range(i + 1, len(df)):
-                    if df["close"][j] > signal.get("tp"):
+                    if df["close"][j] >= signal.get("tp"):
                         close_wallet = np.multiply(current_coins, df["close"][j])
                         clear_profit = np.subtract(close_wallet, start_wallet)
-                        close_profit = np.multiply(np.add(clear_profit, start_wallet), self.trading_fees) - self.trade_volume
+                        close_profit = np.subtract(np.multiply(np.add(clear_profit, start_wallet), self.trading_fees), self.trade_volume)
 
                         total_profit += close_profit
                         contracts_positive += 1
                         print("BUY, pos: ", contracts_positive, df["open_time"][i])
                         break
 
-                    if df["close"][j] < signal.get("tp"):
+                    if df["close"][j] <= signal.get("sl"):
                         close_wallet = np.multiply(current_coins, df["close"][j])
                         clear_lose = np.subtract(start_wallet, close_wallet)
-                        close_lose = self.trade_volume - np.multiply(np.subtract(start_wallet, clear_lose), self.trading_fees)
+                        close_lose = np.subtract(self.trade_volume, np.multiply(np.subtract(start_wallet, clear_lose), self.trading_fees))
 
                         total_loss -= close_lose
                         contracts_negative += 1
+                        break
 
         return {
             "total_profit": total_profit,
