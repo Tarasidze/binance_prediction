@@ -8,11 +8,10 @@ class Logger:
         settings = Settings()
 
         self.file_name = settings.loger_file
-        self.catalogue = settings.outputs_catalogue
+        self.catalog = settings.outputs_catalogue
 
-        self.file_path = os.path.join(os.getcwd(), self.catalogue, self.file_name)
-        
-        
+        self.file = os.path.join(os.getcwd(), self.catalog, self.file_name)
+
     def logg_info_message(self, message):
-        logging.basicConfig(filename=self.file_path, level=logging.INFO)
+        logging.basicConfig(filename=self.file, level=logging.INFO)
         logging.info(message)
