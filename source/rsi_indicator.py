@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
+import talib as ta
 from source.settings import Settings
+
 
 
 class RsiLbIndicator:
@@ -58,16 +60,8 @@ class RsiLbIndicator:
 
     def calculate_rsi_bands_lb(self, df: pd.DataFrame) -> pd.Series:
 
-        """main logic of script, based on source code.
-        Other possible solutions:
-
-        # auc = talib.EMA(np.maximum(src - src.shift(1), 0), ep)
-        # adc = talib.EMA(np.maximum(src.shift(1) - src, 0), ep)
-
-        or:
-
-        auc = talib.EMA(np.maximum(src - np.roll(src, 1), 0), ep)
-        adc = talib.EMA(np.maximum(np.roll(src, 1) - src, 0), tep)
+        """
+        Main logic of script, based on source code.
 
         Args:
             df (pd.DataFrame): data frame for analyzing
@@ -79,8 +73,8 @@ class RsiLbIndicator:
         src = df["close"]
         ep = 2 * self.length - 1
 
-        auc = self._calculate_aus(src, ep)
-        adc = self._calculate_adc(src, ep)
+        auc = ta.EMA(np.maximum(src - np.roll(src, 1), 0), ep)
+        adc = ta.EMA(np.maximum(np.roll(src, 1) - src, 0), ep)
 
         x1 = (self.length - 1) * (adc * self.ob_level
                                  / (100-self.ob_level) - auc)
