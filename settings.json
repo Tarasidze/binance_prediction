@@ -6,12 +6,13 @@
     "rsi_os_level": 30,
     "rsi_length": 14,
 
-    "interval": "1m",
+    "interval": "1d",
     "period_years": 4,
 
     "cci_period": 30,
 
-    "data_file": "data(1).csv",
+    "data_file": "data.csv",
+    "loger_file": "loger.log",
     "outputs_catalogue": "outputs",
 
     "symbol": "BTCUSDT",

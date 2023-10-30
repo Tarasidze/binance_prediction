@@ -17,6 +17,7 @@ class Settings:
         "period_years",
         "cci_period",
         "data_file",
+        "loger_file",
         "symbol",
         "outputs_catalogue",
         "trade_volume",
