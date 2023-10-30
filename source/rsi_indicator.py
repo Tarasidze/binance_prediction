@@ -4,7 +4,6 @@ import talib as ta
 from source.settings import Settings
 
 
-
 class RsiLbIndicator:
 
     """

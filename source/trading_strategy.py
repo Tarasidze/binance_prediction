@@ -28,7 +28,7 @@ class Strategy:
             df["cci"].iloc[-1] > 120
         ):
             entry_price = df["close"].iloc[-1]
-            
+
             signal = {
                 "action": True,
                 "side":  "SELL",
@@ -41,7 +41,7 @@ class Strategy:
               df["close"].iloc[-2] > df["rsi_down"].iloc[-2] and
               df["cci"].iloc[-1] < -100):
             entry_price = df["close"].iloc[-1]
-            
+
             signal = {
                 "action": True,
                 "side":  "BUY",
