@@ -28,7 +28,7 @@ class CCIInicator:
 
         return df
 
-    def calculate_cci(self, df: pd.DataFrame = None) -> pd.DataFrame:
+    def calculate_cci(self, df: pd.DataFrame = None) -> pd.Series:
 
         """
         Calculate CCI-indicator using talib library
@@ -38,17 +38,13 @@ class CCIInicator:
             contain "high", "low", "close" series
 
         Returns:
-            pd.DataFrame: data-frame with cci-indicator series
+            pd.DataFrame: pandas Series cci-indicator
         """
 
         if df is None:
             df = self.get_data_from_file()
 
-        df["cci"] = ta.CCI(
-            df["high"], df["low"], df["close"], self.period
-        )
-
-        return df
+        return ta.CCI(df["high"], df["low"], df["close"], self.period)
 
     def show_plot(self, df: pd.DataFrame) -> None:
         _, ax = plt.subplots(2, sharex=True)
