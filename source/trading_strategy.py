@@ -23,8 +23,8 @@ class Strategy:
         """
 
         if (
-            df["close"].iloc[-1] > df["si_up"].iloc[-1] and
-            df["close"].iloc[-2] < df["si_up"].iloc[-2] and
+            df["close"].iloc[-1] > df["rsi_up"].iloc[-1] and
+            df["close"].iloc[-2] < df["rsi_up"].iloc[-2] and
             df["cci"].iloc[-1] > 120
         ):
             entry_price = df["close"].iloc[-1]
