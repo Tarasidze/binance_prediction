@@ -11,7 +11,7 @@ class Backtester:
         self.trade_volume = settings.trade_volume
         self.trading_fees = 1 - (settings.trading_fees / 100)
         self.trading_fees_short = 1 + settings.trading_fees
-        
+
         self.total_profit = 0
         self.total_loss = 0
         self.contracts_negative = 0
@@ -25,7 +25,7 @@ class Backtester:
 
             if signal.get("action") and signal.get("side") == "SELL":
                 current_coins = np.divide(start_wallet, signal.get("entry_price"))
-                self.calculate_short(df, i, current_coins, start_wallet, signal)                
+                self.calculate_short(df, i, current_coins, start_wallet, signal)
 
             elif signal.get("action") and signal.get("side") == "BUY":
                 current_coins = np.divide(start_wallet, signal.get("entry_price"))
@@ -38,99 +38,120 @@ class Backtester:
             "contracts_positive": self.contracts_positive,
             "contracts_negative": self.contracts_negative,
             "profit_factor": np.divide(self.total_profit, -self.total_loss),
-            "win_rate": np.divide(self.contracts_positive, np.add(self.contracts_positive, self.contracts_negative))
+            "win_rate": np.divide(
+                self.contracts_positive,
+                np.add(self.contracts_positive, self.contracts_negative)
+            )
         }
 
     def calculate_short(self, df, index, current_coins, start_wallet, signal):
         for j in range(index + 1, len(df)):
-                if df["close"][j] <= signal.get("tp"):                    
-                    clear_profit = np.subtract(start_wallet, np.multiply(current_coins, df["close"][j]))
-                    close_wallet = np.multiply(self.trading_fees, np.add(start_wallet, clear_profit))
-                    profit = np.subtract(self.trade_volume, close_wallet)
-                                        
-                    if profit >=0:
-                        self.total_profit += profit
-                        self.contracts_positive += 1
-                    else:
-                        self.total_loss += profit
-                        self.contracts_negative += 1
-                    
-                    LoggerCsv().logg_info_message(
-                        {
-                           "open_time": df["open_time"].iloc[index],
-                           "open_price": df["close"].iloc[index],
-                           "close_time": df["open_time"].iloc[j],
-                           "close_price": df["close"].iloc[j],
-                           "trade_type": "SHORT",
-                           "profit": profit
-                        }
-                    )
-                    
-                    return
+            if df["close"][j] <= signal.get("tp"):
+                clear_profit = np.subtract(
+                    start_wallet,
+                    np.multiply(current_coins, df["close"][j])
+                )
+                close_wallet = np.multiply(
+                    self.trading_fees,
+                    np.add(start_wallet, clear_profit)
+                )
+                profit = np.subtract(self.trade_volume, close_wallet)
 
-                if df["close"][j] > signal.get("sl"):
-                    loss = np.subtract(start_wallet, np.multiply(current_coins, df["close"][j]))
-                    close_wallet = np.multiply(np.subtract(start_wallet, loss), self.trading_fees)
-                    clear_loss = np.subtract(self.trade_volume, close_wallet)
-                    
-                    self.total_loss += clear_loss
+                if profit >= 0:
+                    self.total_profit += profit
+                    self.contracts_positive += 1
+                else:
+                    self.total_loss += profit
                     self.contracts_negative += 1
-                    
-                    LoggerCsv().logg_info_message(
-                        {
-                           "open_time": df["open_time"].iloc[index],
-                           "open_price": df["close"].iloc[index],
-                           "close_time": df["open_time"].iloc[j],
-                           "close_price": df["close"].iloc[j],
-                           "trade_type": "SHORT",
-                           "profit": -1 * clear_loss
-                        }
-                    )
-                    
-                    return
+
+                LoggerCsv().logg_info_message(
+                    {
+                        "open_time": df["open_time"].iloc[index],
+                        "open_price": df["close"].iloc[index],
+                        "close_time": df["open_time"].iloc[j],
+                        "close_price": df["close"].iloc[j],
+                        "trade_type": "SHORT",
+                        "profit": profit
+                    }
+                )
+
+                return
+
+            if df["close"][j] > signal.get("sl"):
+                loss = np.subtract(
+                    start_wallet,
+                    np.multiply(current_coins, df["close"][j])
+                )
+                close_wallet = np.multiply(
+                    np.subtract(start_wallet, loss),
+                    self.trading_fees
+                )
+                clear_loss = np.subtract(self.trade_volume, close_wallet)
+
+                self.total_loss += clear_loss
+                self.contracts_negative += 1
+
+                LoggerCsv().logg_info_message(
+                    {
+                        "open_time": df["open_time"].iloc[index],
+                        "open_price": df["close"].iloc[index],
+                        "close_time": df["open_time"].iloc[j],
+                        "close_price": df["close"].iloc[j],
+                        "trade_type": "SHORT",
+                        "profit": -1 * clear_loss
+                    }
+                )
+
+                return
 
     def calculate_long(self, df, index, current_coins, signal):
         for j in range(index + 1, len(df)):
-                if df["close"][j] >= signal.get("tp"):
-                    close_wallet = np.multiply(np.multiply(current_coins, df["close"][j]), self.trading_fees)                                        
-                    profit = np.subtract(close_wallet, self.trade_volume)
+            if df["close"][j] >= signal.get("tp"):
+                close_wallet = np.multiply(
+                    np.multiply(current_coins, df["close"][j]),
+                    self.trading_fees
+                )
+                profit = np.subtract(close_wallet, self.trade_volume)
 
-                    if profit >= 0:
-                        self.total_profit += profit
-                        self.contracts_positive += 1
-                    else:
-                        self.total_loss += profit
-                        self.contracts_negative += 1
-
-                    LoggerCsv().logg_info_message(
-                        {
-                           "open_time": df["open_time"].iloc[index],
-                           "open_price": df["close"].iloc[index],
-                           "close_time": df["open_time"].iloc[j],
-                           "close_price": df["close"].iloc[j],
-                           "trade_type": "LONG",
-                           "profit": profit
-                        }
-                    )
-
-                    return
-
-                if df["close"][j] < signal.get("sl"):
-                    close_wallet = np.multiply(np.multiply(current_coins, df["close"][j]), self.trading_fees)
-                    clear_loss = self.trade_volume - close_wallet
-
-                    self.total_loss += clear_loss
+                if profit >= 0:
+                    self.total_profit += profit
+                    self.contracts_positive += 1
+                else:
+                    self.total_loss += profit
                     self.contracts_negative += 1
 
-                    LoggerCsv().logg_info_message(
-                        {
-                           "open_time": df["open_time"].iloc[index],
-                           "open_price": df["close"].iloc[index],
-                           "close_time": df["open_time"].iloc[j],
-                           "close_price": df["close"].iloc[j],
-                           "trade_type": "LONG",
-                           "profit": -1 * clear_loss
-                        }
-                    )
+                LoggerCsv().logg_info_message(
+                    {
+                        "open_time": df["open_time"].iloc[index],
+                        "open_price": df["close"].iloc[index],
+                        "close_time": df["open_time"].iloc[j],
+                        "close_price": df["close"].iloc[j],
+                        "trade_type": "LONG",
+                        "profit": profit
+                    }
+                )
 
-                    return
+                return
+
+            if df["close"][j] < signal.get("sl"):
+                close_wallet = np.multiply(
+                    np.multiply(current_coins, df["close"][j]),
+                    self.trading_fees
+                )
+                clear_loss = self.trade_volume - close_wallet
+
+                self.total_loss += clear_loss
+                self.contracts_negative += 1
+
+                LoggerCsv().logg_info_message(
+                    {
+                        "open_time": df["open_time"].iloc[index],
+                        "open_price": df["close"].iloc[index],
+                        "close_time": df["open_time"].iloc[j],
+                        "close_price": df["close"].iloc[j],
+                        "trade_type": "LONG",
+                        "profit": -1 * clear_loss
+                    }
+                )
+
+                return
