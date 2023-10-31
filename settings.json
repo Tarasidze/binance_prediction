@@ -11,8 +11,8 @@
 
     "cci_period": 30,
 
-    "data_file": "data.csv",
-    "loger_file": "loger.log",
+    "data_file": "data_minute.csv",
+    "loger_file": "logging.csv",
     "outputs_catalogue": "outputs",
 
     "symbol": "BTCUSDT",

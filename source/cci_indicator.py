@@ -2,7 +2,6 @@ import os
 import pandas as pd
 import talib as ta
 import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
 from source.settings import Settings
 
 
@@ -47,7 +46,7 @@ class CCIInicator:
 
         return ta.CCI(df["high"], df["low"], df["close"], self.period)
 
-    def show_plot(self, df: pd.DataFrame) -> None:
+    def show_rsi_plot(self, df: pd.DataFrame) -> None:
         x_axis_date = df["open_time"]
         rsi_up = df["rsi_up"]
         rsi_down = df["rsi_down"]

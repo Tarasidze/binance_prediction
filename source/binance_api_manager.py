@@ -147,20 +147,14 @@ class BinanceApiManager:
         """
 
         if df is None:
-            try:
-                file_path = os.path.join(
-                    os.getcwd(), self.catalogue, self.file_name
-                    )
-                df = pd.read_csv(file_path)
+            df = self.get_data_from_file()
 
-            except (FileExistsError, FileNotFoundError) as exc:
-                print("File not found or invalid path: ", exc)
-                return False
-    
-        df.set_index("open_time", inplace=True)
         df.set_index("open_time", inplace=True)
 
-        title = f"Chart for {self.symbol}, in last {self.period_years} periods"
+        if not isinstance(df.index, pd.DatetimeIndex):
+            df.index = pd.to_datetime(df.index)
+
+        title = f"Chart for {self.symbol}, in last {self.period_years} years"
 
         mpf.plot(df, type="candle", volume=True, title=title, style="yahoo")
 
