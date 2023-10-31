@@ -35,14 +35,16 @@ class LoggerCsv:
         )
 
     def logg_info_message(self, message: dict, fields: list = None) -> None:
-        fields = [
-            "open_time",
-            "open_price",
-            "close_time",
-            "close_price",
-            "trade_type",
-            "profit"
-        ]
+
+        if fields is None:
+            fields = [
+                "open_time",
+                "open_price",
+                "close_time",
+                "close_price",
+                "trade_type",
+                "profit"
+            ]
 
         file_exists = os.path.exists(self.file_path)
 
