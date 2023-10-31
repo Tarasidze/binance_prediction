@@ -7,6 +7,8 @@ The script provides a trading strategy that takes quote history as input, calcul
 - [Installation](#rocket-getting-started)
 - [Script usage](#computer-script-usage)
 - [TODO](#hammer-todo)
+- [Screenshots](#Demo)
+
 
 ## :rocket: Installation 
 
@@ -23,7 +25,7 @@ The script provides a trading strategy that takes quote history as input, calcul
         ```bash
         source venv/bin/activate 
         ```
-     
+
 2. **Install requirements**
    ```
    pip install -r requirements.txt
@@ -36,7 +38,6 @@ The script provides a trading strategy that takes quote history as input, calcul
 
 4. **Fill your secret keys to .env file**
 
-    
 
 ## :computer: Script usage
 
@@ -54,6 +55,7 @@ The script provides a trading strategy that takes quote history as input, calcul
         python3 main.py
         ```
 
+
 ## :hammer: TODO
 
 1. **Add module for managing files:**
@@ -61,15 +63,19 @@ The script provides a trading strategy that takes quote history as input, calcul
    ```
    Create a package for reading and writing data-frames to file and remove corresponding methods from other classes.
    ```
-2. **Check the better solution for the pine-script converter**
+2. **Create interfaces for less dependencies between classes**
 
-3. **Create interfaces for less dependencies between classes**
+3. **Add module for charts**
 
-4. **Add module for charts**
+4. **What is the better speed: pass the whole data-frame or slice?**
 
-5. **What is the better speed: pass the whole data-frame or slice?**
+5. **Fix indexes in dataframe**
 
-6. **Fix indexes in dataframe**
+6. **Refactor backtester.py according to PEP8 standards**
 
-7. **Refactor backtester.py according to PEP8 standards**
-    
+7. **Create interface for loggers**
+
+
+## Demo
+![Website Interface](pictures/btcusdt.jpg)
+![Website Interface](pictures/rsi-indicator.jpg)
