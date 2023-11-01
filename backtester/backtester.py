@@ -9,8 +9,56 @@ class Backtester:
     def __init__(self) -> None:
         settings = Settings()
         self.trade_volume = settings.trade_volume
-        self.trading_fees = 1 - (settings.trading_fees / 100)
-        self.trading_fees_short = 1 + settings.trading_fees
+        self.trading_fees = 1 - (settings.trading_fees / 100)  # 0.9995
+        self.fees_coeff = np.float64(settings.trading_fees / 100)  # 0.0005
+
+        self.long_tp_perc = np.float64(1)
+        self.long_sl_perc = np.float64(0.4)
+        self.short_tp_perc = np.float64(1.1)
+        self.short_sl_perc = np.float64(0.5)
+
+        self.long_tp_coeff = np.divide(self.long_tp_perc, 100)    # 0.01
+        self.long_sl_coeff = np.divide(self.long_sl_perc, 100)    # 0.004
+        self.short_tp_coeff = np.divide(self.short_tp_perc, 100)  # 0.011
+        self.short_sl_coeff = np.divide(self.short_sl_perc, 100)  # 0.005
+
+        self.long_tp_multiplier = np.multiply(
+            np.subtract(np.add(1, self.long_tp_coeff), self.fees_coeff),
+            self.trading_fees)  # 1.00899525
+
+        self.long_sl_multiplier = np.subtract(
+            np.float64(1),
+            np.multiply(
+                np.subtract(1, self.long_sl_coeff),
+                np.square(self.trading_fees)
+                )
+            )  # 0.00499575
+
+        self.short_tp_multiplier = np.multiply(
+            np.add(
+                np.multiply(1, self.trading_fees),
+                np.subtract(
+                    self.trading_fees, np.subtract(1, self.short_tp_coeff)
+                    )
+                ),
+            self.trading_fees
+        )  # 1.009495
+
+        self.short_sl_multiplier = np.multiply(
+            np.subtract(np.add(1, self.short_sl_coeff), self.trading_fees),
+            self.trading_fees
+        )  # 0.00549725
+
+        self.long_profit = np.subtract(
+            np.multiply(self.trade_volume, self.long_tp_multiplier),
+            self.trade_volume
+        )
+        self.long_loss = np.multiply(self.trade_volume, self.long_sl_multiplier)
+        self.short_profit = np.subtract(
+            np.multiply(self.trade_volume, self.short_tp_multiplier),
+            self.trade_volume
+        )
+        self.short_loss = np.multiply(self.trade_volume, self.short_sl_multiplier)
 
         self.total_profit = 0
         self.total_loss = 0
@@ -18,18 +66,15 @@ class Backtester:
         self.contracts_positive = 0
 
     def run_tester(self, df: pd.DataFrame) -> dict:
-        start_wallet = np.multiply(self.trade_volume, self.trading_fees)
 
         for i in range(2, len(df) - 1):
-            signal = Strategy().apply_strategy(df.iloc[i-2:i])
+            signal = Strategy().get_signals(df.iloc[i-2:i])
 
             if signal.get("action") and signal.get("side") == "SELL":
-                current_coins = np.divide(start_wallet, signal.get("entry_price"))
-                self.calculate_short(df, i, current_coins, start_wallet, signal)
+                self.calculate_short(df, i, signal)
 
             elif signal.get("action") and signal.get("side") == "BUY":
-                current_coins = np.divide(start_wallet, signal.get("entry_price"))
-                self.calculate_long(df, i, current_coins, signal)
+                self.calculate_long(df, i, signal)
                 print("BUY, pos: ", self.contracts_positive, df["open_time"][i])
 
         return {
@@ -37,58 +82,37 @@ class Backtester:
             "total_loss": self.total_loss,
             "contracts_positive": self.contracts_positive,
             "contracts_negative": self.contracts_negative,
-            "profit_factor": np.divide(self.total_profit, -self.total_loss),
+            "profit_factor": np.divide(self.total_profit, self.total_loss),
             "win_rate": np.divide(
                 self.contracts_positive,
                 np.add(self.contracts_positive, self.contracts_negative)
             )
         }
 
-    def calculate_short(self, df, index, current_coins, start_wallet, signal):
+    def calculate_short(self, df, index, signal):
         for j in range(index + 1, len(df)):
             if df["close"][j] <= signal.get("tp"):
-                clear_profit = np.subtract(
-                    start_wallet,
-                    np.multiply(current_coins, df["close"][j])
-                )
-                close_wallet = np.multiply(
-                    self.trading_fees,
-                    np.add(start_wallet, clear_profit)
-                )
-                profit = np.subtract(self.trade_volume, close_wallet)
 
-                if profit >= 0:
-                    self.total_profit += profit
-                    self.contracts_positive += 1
-                else:
-                    self.total_loss += profit
-                    self.contracts_negative += 1
+                self.total_profit += self.short_profit
+                self.contracts_positive += 1
 
                 LoggerCsv().logg_info_message(
                     {
-                        "open_time": df["open_time"].iloc[index],
-                        "open_price": df["close"].iloc[index],
+                        "open_time": signal.get("open_time"),
+                        "open_price": signal.get("entry_price"),
                         "close_time": df["open_time"].iloc[j],
                         "close_price": df["close"].iloc[j],
                         "trade_type": "SHORT",
-                        "profit": profit
+                        "result": "win",
+                        "profit": self.short_profit
                     }
                 )
 
                 return
 
             if df["close"][j] > signal.get("sl"):
-                loss = np.subtract(
-                    start_wallet,
-                    np.multiply(current_coins, df["close"][j])
-                )
-                close_wallet = np.multiply(
-                    np.subtract(start_wallet, loss),
-                    self.trading_fees
-                )
-                clear_loss = np.subtract(self.trade_volume, close_wallet)
 
-                self.total_loss += clear_loss
+                self.total_loss += self.short_loss
                 self.contracts_negative += 1
 
                 LoggerCsv().logg_info_message(
@@ -98,49 +122,37 @@ class Backtester:
                         "close_time": df["open_time"].iloc[j],
                         "close_price": df["close"].iloc[j],
                         "trade_type": "SHORT",
-                        "profit": -1 * clear_loss
+                        "result": "loss",
+                        "profit": -1 * self.short_loss
                     }
                 )
 
                 return
 
-    def calculate_long(self, df, index, current_coins, signal):
+    def calculate_long(self, df, index, signal):
         for j in range(index + 1, len(df)):
             if df["close"][j] >= signal.get("tp"):
-                close_wallet = np.multiply(
-                    np.multiply(current_coins, df["close"][j]),
-                    self.trading_fees
-                )
-                profit = np.subtract(close_wallet, self.trade_volume)
 
-                if profit >= 0:
-                    self.total_profit += profit
-                    self.contracts_positive += 1
-                else:
-                    self.total_loss += profit
-                    self.contracts_negative += 1
+                self.total_profit += self.long_profit
+                self.contracts_positive += 1
 
                 LoggerCsv().logg_info_message(
                     {
-                        "open_time": df["open_time"].iloc[index],
-                        "open_price": df["close"].iloc[index],
+                        "open_time": signal.get("open_time"),
+                        "open_price": signal.get("entry_price"),
                         "close_time": df["open_time"].iloc[j],
-                        "close_price": df["close"].iloc[j],
+                        "close_price": signal.get("tp"),
+                        "result": "win",
                         "trade_type": "LONG",
-                        "profit": profit
+                        "profit": self.long_profit
                     }
                 )
 
                 return
 
             if df["close"][j] < signal.get("sl"):
-                close_wallet = np.multiply(
-                    np.multiply(current_coins, df["close"][j]),
-                    self.trading_fees
-                )
-                clear_loss = self.trade_volume - close_wallet
 
-                self.total_loss += clear_loss
+                self.total_loss += self.long_loss
                 self.contracts_negative += 1
 
                 LoggerCsv().logg_info_message(
@@ -150,7 +162,8 @@ class Backtester:
                         "close_time": df["open_time"].iloc[j],
                         "close_price": df["close"].iloc[j],
                         "trade_type": "LONG",
-                        "profit": -1 * clear_loss
+                        "result": "loss",
+                        "profit": -1 * self.long_loss
                     }
                 )
 
