@@ -69,13 +69,12 @@ The script provides a trading strategy that takes quote history as input, calcul
 
 4. **What is the better speed: pass the whole data-frame or slice?**
 
-5. **Fix indexes in dataframe**
-
-6. **Refactor backtester.py according to PEP8 standards**
-
-7. **Create interface for loggers**
+5. **Create interface for loggers**
 
 
 ## Demo
-![Website Interface](pictures/btcusdt.jpg)
-![Website Interface](pictures/rsi-indicator.jpg)
+![Screenshots](pictures/btcusdt.jpg)
+![Screenshots](pictures/rsi-indicator.jpg)
+![Screenshots](pictures/logs.jpg)
+![Screenshots](pictures/data_csv.jpg)
+![Screenshots](pictures/coeff_logic.jpg)
