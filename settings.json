@@ -11,7 +11,7 @@
 
     "cci_period": 30,
 
-    "data_file": "data_minute.csv",
+    "data_file": "data.csv",
     "loger_file": "logging.csv",
     "outputs_catalogue": "outputs",
 

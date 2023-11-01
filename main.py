@@ -28,7 +28,7 @@ def main():
     # am.seve_data_to_file(df=df)
 
     data_dict = Backtester().run_tester(df)
-    json.dump(data_dict, open("source/result.json", "w"))
+    json.dump(data_dict, open("outputs/result.json", "w"))
     print(data_dict)
 
     create_pdf(data_dict, "outputs/report.pdf")
