@@ -43,6 +43,7 @@ class LoggerCsv:
                 "close_time",
                 "close_price",
                 "trade_type",
+                "result",
                 "profit"
             ]
 
