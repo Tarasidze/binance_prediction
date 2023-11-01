@@ -9,7 +9,7 @@ class Strategy:
     """
 
     @staticmethod
-    def apply_strategy(
+    def get_signals(
         df: pd.DataFrame,
     ) -> dict:
 
@@ -33,6 +33,7 @@ class Strategy:
                 "action": True,
                 "side":  "SELL",
                 "entry_price": entry_price,
+                "open_time": df["open_time"].iloc[-1],
                 "tp": np.multiply(entry_price, 0.989),
                 "sl": np.multiply(entry_price, 1.005),
             }
@@ -46,8 +47,9 @@ class Strategy:
                 "action": True,
                 "side":  "BUY",
                 "entry_price": entry_price,
+                "open_time": df["open_time"].iloc[-1],
                 "tp": np.multiply(entry_price, 1.01),
-                "sl": np.multiply(entry_price, 0.96),
+                "sl": np.multiply(entry_price, 0.996),
             }
 
         else:
